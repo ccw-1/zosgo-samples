@@ -71,27 +71,27 @@ func main() {
 	w32ptr = (*WorkArea32)(w32)
 	w32ptr.addrSsob1 = uint32(uintptr(unsafe.Pointer(&(w32ptr.ssob)))) | 0x80000000
 	w32ptr.ssob.SSOBID = [4]byte{'S', 'S', 'O', 'B'}
-	zutils.A2e(w32ptr.ssob.SSOBID[:])
+	zutils.AtoE(w32ptr.ssob.SSOBID[:])
 	w32ptr.ssob.SSOBLEN = uint16((reflect.TypeOf((*Ssob)(nil)).Elem()).Size())
 	w32ptr.ssob.SSOBSSIB = uint32(uintptr(unsafe.Pointer(&w32ptr.ssib)))
 	w32ptr.ssob.SSOBFUNC = 54 // subsystem verstion information
 	w32ptr.ssob.SSOBINDV = uint32(uintptr(unsafe.Pointer(&w32ptr.ssvi)))
 	w32ptr.ssib.SSIBID = [4]byte{'S', 'S', 'I', 'B'}
-	zutils.A2e(w32ptr.ssib.SSIBID[:])
+	zutils.AtoE(w32ptr.ssib.SSIBID[:])
 	w32ptr.ssib.SSIBLEN = uint16((reflect.TypeOf((*Ssib)(nil)).Elem()).Size())
 	w32ptr.ssib.SSIBSSNM = [4]byte{'M', 'S', 'T', 'R'}
-	zutils.A2e(w32ptr.ssib.SSIBSSNM[:])
+	zutils.AtoE(w32ptr.ssib.SSIBSSNM[:])
 	w32ptr.ssvi.SSVILEN = uint16((reflect.TypeOf((*Ssvi)(nil)).Elem()).Size())
 	w32ptr.ssvi.SSVIVER = 2
 	w32ptr.ssvi.SSVIID = [4]byte{'S', 'S', 'V', 'I'}
-	zutils.A2e(w32ptr.ssvi.SSVIID[:])
+	zutils.AtoE(w32ptr.ssvi.SSVIID[:])
 	ret := zutils.Iefssreq(unsafe.Pointer(&w32ptr.addrSsob1), unsafe.Pointer(&w32ptr.dsa[0]))
 	if ret == 0 {
-		zutils.E2a(w32ptr.ssvi.SSVIVERS[:])
+		zutils.EtoA(w32ptr.ssvi.SSVIVERS[:])
 		fmt.Printf("VERS: %s\n", string(w32ptr.ssvi.SSVIVERS[:]))
-		zutils.E2a(w32ptr.ssvi.SSVIFMID[:])
+		zutils.EtoA(w32ptr.ssvi.SSVIFMID[:])
 		fmt.Printf("FMID: %s\n", string(w32ptr.ssvi.SSVIFMID[:]))
-		zutils.E2a(w32ptr.ssvi.SSVICNAM[:])
+		zutils.EtoA(w32ptr.ssvi.SSVICNAM[:])
 		fmt.Printf("CNAM: %s\n", string(w32ptr.ssvi.SSVICNAM[:]))
 		// debug:  runtime.HexDump(uintptr(w32), (reflect.TypeOf((*WorkArea32)(nil)).Elem()).Size())
 	} else {
