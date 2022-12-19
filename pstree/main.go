@@ -119,16 +119,33 @@ func process(outlines []Outline) {
 			pmap[stuff.Ppid].Children = append(pmap[stuff.Ppid].Children, pid)
 		}
 	}
-	res := doPrint(pmap, 1, 0)
+	boxes := make([]byte, 2048)
+	for i := range boxes {
+		boxes[i] = ' '
+	}
+
+	res := doPrint(pmap, 1, 0, boxes)
 	fmt.Print(res)
 }
-func doPrint(pidmap PidMap, pid int32, depth int) string {
+func doPrint(pidmap PidMap, pid int32, depth int, boxes []byte) string {
 	buffer := new(bytes.Buffer)
 	if pid != 1 {
-		fmt.Fprintf(buffer, "%*s(%v) %v\n", depth*2, "", pid, pidmap[pid].Cmd)
+		fmt.Fprintf(buffer, "%s(%v) %v\n", string(boxes[:depth*2]), pid, pidmap[pid].Cmd)
+		if boxes[depth*2-2] != '|' {
+			boxes[depth*2-2] = ' '
+		}
+		boxes[depth*2-1] = ' '
 	}
-	for _, child := range pidmap[pid].Children {
-		fmt.Fprintf(buffer, doPrint(pidmap, child, depth+1))
+	z := len(pidmap[pid].Children)
+	for i, child := range pidmap[pid].Children {
+		if i == (z - 1) {
+			boxes[depth*2] = '+'
+			boxes[depth*2+1] = '-'
+		} else {
+			boxes[depth*2] = '|'
+			boxes[depth*2+1] = '-'
+		}
+		fmt.Fprintf(buffer, doPrint(pidmap, child, depth+1, boxes))
 	}
 	return buffer.String()
 }
