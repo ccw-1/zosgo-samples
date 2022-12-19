@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"unsafe"
@@ -127,10 +128,41 @@ func process(outlines []Outline) {
 	res := doPrint(pmap, 1, 0, boxes)
 	fmt.Print(res)
 }
+
+var asciiBox bool
+
+func boxString(in []byte) (out string) {
+	if asciiBox {
+		out = string(in)
+	} else {
+		var b bytes.Buffer
+		sz := len(in)
+		for i, v := range in {
+			if v == '-' {
+				b.WriteRune('\u2500')
+			} else if v == '+' {
+				b.WriteRune('\u2514')
+			} else if v == '|' {
+				if i < (sz - 1) {
+					if in[i+1] == ' ' {
+						b.WriteRune('\u2502')
+					} else {
+						b.WriteRune('\u251c')
+					}
+				}
+			} else {
+				b.WriteByte(v)
+			}
+		}
+		out = b.String()
+	}
+	return
+}
+
 func doPrint(pidmap PidMap, pid int32, depth int, boxes []byte) string {
 	buffer := new(bytes.Buffer)
 	if pid != 1 {
-		fmt.Fprintf(buffer, "%s(%v) %v\n", string(boxes[:depth*2]), pid, pidmap[pid].Cmd)
+		fmt.Fprintf(buffer, "%s(%v) %v\n", boxString(boxes[:depth*2]), pid, pidmap[pid].Cmd)
 		if boxes[depth*2-2] != '|' {
 			boxes[depth*2-2] = ' '
 		}
@@ -181,6 +213,8 @@ func convCommand(in []byte) {
 }
 
 func main() {
+	flag.BoolVar(&asciiBox, "A", false, "Use ASCII box characters")
+	flag.Parse()
 	var indata Pgtha
 	var indata_len int32
 	var outdata [5000]byte
