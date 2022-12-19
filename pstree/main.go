@@ -101,7 +101,7 @@ type PidMap map[int32]*Process
 
 func process(outlines []Outline) {
 	pmap := make(PidMap)
-	pmap[0] = &Process{0, -1, "", nil}
+	pmap[1] = &Process{1, 0, "--root--", nil}
 	for _, value := range outlines {
 		p := new(Process)
 		pmap[value.Pid] = p
@@ -110,22 +110,22 @@ func process(outlines []Outline) {
 		p.Cmd = value.Command
 	}
 	for pid, stuff := range pmap {
-		if pid == 0 {
+		if pid == 1 {
 			continue
 		}
 		if pmap[stuff.Ppid] == nil {
-			pmap[0].Children = append(pmap[0].Children, pid)
+			pmap[1].Children = append(pmap[1].Children, pid)
 		} else {
 			pmap[stuff.Ppid].Children = append(pmap[stuff.Ppid].Children, pid)
 		}
 	}
-	res := doPrint(pmap, 0, 0)
+	res := doPrint(pmap, 1, 0)
 	fmt.Print(res)
 }
 func doPrint(pidmap PidMap, pid int32, depth int) string {
 	buffer := new(bytes.Buffer)
-	if pid != 0 {
-		fmt.Fprintf(buffer, "%*s(%v) %v\n", depth*4, "", pid, pidmap[pid].Cmd)
+	if pid != 1 {
+		fmt.Fprintf(buffer, "%*s(%v) %v\n", depth*2, "", pid, pidmap[pid].Cmd)
 	}
 	for _, child := range pidmap[pid].Children {
 		fmt.Fprintf(buffer, doPrint(pidmap, child, depth+1))
@@ -213,11 +213,15 @@ func main() {
 					break
 				}
 			}
-			convCommand(gthf.Command[:gthf.Len-1])
-			outlines = append(outlines, Outline{gthc.Pid, gthc.Ppid, string(gthf.Command[:gthf.Len-1])})
+			if uintptr(unsafe.Pointer(gthf)) != 0 && gthf.Len > 0 {
+				convCommand(gthf.Command[:gthf.Len-1])
+				outlines = append(outlines, Outline{gthc.Pid, gthc.Ppid, string(gthf.Command[:gthf.Len-1])})
+			}
+			indata.Accesspid = PGTHA_NEXT
+			indata.Pid = gthc.Pid
+		} else {
+			break
 		}
-		indata.Accesspid = PGTHA_NEXT
-		indata.Pid = gthc.Pid
 	}
 	process(outlines)
 }
