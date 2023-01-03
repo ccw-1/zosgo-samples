@@ -33,3 +33,87 @@ TEXT ·Bpxcall(SB), NOSPLIT|NOFRAME, $0
 	BYTE  $0xE9                 // clobbers 0,1,14,15
 	MOVD  R8, R15               // restore 15
 	JMP   R7                    // return via saved return address
+
+TEXT ·Svc8(SB), NOSPLIT|NOFRAME, $0
+	MOVD r0+0(FP), R0      // arg1-> R0
+	MOVD r1+8(FP), R1      // arg2-> R1
+	MOVD R15, R2           // save r15
+	BYTE $0x0A             // SVC 8
+	BYTE $0x08             // ...
+	MOVD R15, R3           // R15->R3
+	MOVD R2, R15           // restore R15
+	MOVD R0, retr0+16(FP)
+	MOVD R1, retr1+24(FP)
+	MOVD R3, retr15+32(FP)
+	RET
+
+TEXT ·Svc9(SB), NOSPLIT|NOFRAME, $0
+	MOVD r0+0(FP), R0     // arg1-> R0
+	MOVD R15, R2          // save r15
+	BYTE $0x0A            // SVC 9
+	BYTE $0x09            // ...
+	MOVD R15, R3          // R15->R3
+	MOVD R2, R15          // restore R15
+	MOVD R3, retr15+8(FP)
+	RET
+
+TEXT ·Call24(SB), NOSPLIT|NOFRAME, $0
+	MOVD g, R8                                                             // preserve R13,R14,R15
+	MOVD R14, R9
+	MOVD R15, R10
+	MOVD modinfo+0(FP), R7                                                 // arg1-> R0
+	MOVD 16(R7), R1
+	MOVD 24(R7), g
+	MOVD 8(R7), R15
+	BYTE $0x0D                                                             // BASR 14,0
+	BYTE $0xE0
+	ADD  $22, R14                                                          // suppose to be address of label BACK
+	MOVD R14, 64(R7)                                                       // set the branch back adddress
+	MOVD $48(R7), R14                                                      // R14 points to SAM24
+	BYTE $0xEB; BYTE $0xEC; BYTE $0xD0; BYTE $0x48; BYTE $0x00; BYTE $0x26 // STMH     r14,r12,72(r13) save higher half of register
+	BYTE $0x07; BYTE $0xFE                                                 // BR 14
+
+BACK:
+	BYTE $0xEB; BYTE $0xEC; BYTE $0xD0; BYTE $0x48; BYTE $0x00; BYTE $0x96 // LMH      r14,r12,72(r13) restore higher half of register
+	MOVD R15, 32(R7)                                                       // set p.R15
+	MOVD R15, 16(R10)
+	MOVD R10, R15
+	MOVD R9, R14
+	MOVD R8, g
+	RET
+
+TEXT ·Call31(SB), NOSPLIT|NOFRAME, $0
+	MOVD g, R8                                                             // preserve R13,R14,R15
+	MOVD R14, R9
+	MOVD R15, R10
+	MOVD modinfo+0(FP), R7                                                 // arg1-> R0
+	MOVD 16(R7), R1
+	MOVD 24(R7), g
+	MOVD 8(R7), R15
+	BYTE $0xEB; BYTE $0xEC; BYTE $0xD0; BYTE $0x48; BYTE $0x00; BYTE $0x26 // STMH     r14,r12,72(r13) save higher half of register
+	BYTE $0x01; BYTE $0x0D                                                 // SAM31
+	BYTE $0x0D; BYTE $0xEF                                                 // BASR 14,15
+	BYTE $0x01; BYTE $0x0E                                                 // SAM64
+	BYTE $0xEB; BYTE $0xEC; BYTE $0xD0; BYTE $0x48; BYTE $0x00; BYTE $0x96 // LMH      r14,r12,72(r13) restore higher half of register
+	MOVD R15, 32(R7)                                                       // set p.R15
+	MOVD R15, 16(R10)
+	MOVD R10, R15
+	MOVD R9, R14
+	MOVD R8, g
+	RET
+
+TEXT ·Call64(SB), NOSPLIT|NOFRAME, $0
+	MOVD g, R8                                                             // preserve R13,R14,R15
+	MOVD R14, R9
+	MOVD R15, R10
+	MOVD modinfo+0(FP), R7                                                 // arg1-> R0
+	MOVD 16(R7), R1
+	MOVD 24(R7), g
+	MOVD 8(R7), R15
+	BYTE $0x0D; BYTE $0xEF                                                 // BASR 14,15
+	MOVD R15, 32(R7)                                                       // set p.R15
+	MOVD R15, 16(R10)
+	MOVD R10, R15
+	MOVD R9, R14
+	MOVD R8, g
+	RET

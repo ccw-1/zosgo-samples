@@ -13,3 +13,9 @@ Assembly examples for Go on ZOS.
 	go build
 	./pstree
 ```
+
+3. load modules
+```
+	cd loadmod
+	./dotest
+```
