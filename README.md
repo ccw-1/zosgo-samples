@@ -7,15 +7,22 @@ Assembly examples for Go on ZOS.
 	./iefssreq
 ```
 
-2. pstree
+2. pstree:
 ```
 	cd pstree
 	go build
 	./pstree
 ```
 
-3. load modules
+3. load modules:
 ```
 	cd loadmod
 	./dotest
+```
+
+4. IEANTRT:
+```
+	cd ieantrt
+	go build
+	./ieantrt
 ```
