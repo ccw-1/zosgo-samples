@@ -26,3 +26,10 @@ Assembly examples for Go on ZOS.
 	go build
 	./ieantrt
 ```
+
+5. racfapi:
+```
+	cd racfapi
+	go build
+	./racfapi
+```
