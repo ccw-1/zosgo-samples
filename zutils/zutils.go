@@ -65,10 +65,12 @@ func Iefssreq(parm unsafe.Pointer, dsa unsafe.Pointer) (ret uintptr) {
 	return
 }
 
+type amode uintptr
+
 const (
-	Amode24 = 1
-	Amode31 = 2
-	Amode64 = 3
+	Amode24 amode = 1
+	Amode31 amode = 2
+	Amode64 amode = 3
 )
 
 type Thunk24 struct {
@@ -108,7 +110,7 @@ type ModuleInfo struct {
 	R1      uintptr
 	R13     unsafe.Pointer
 	R15     uintptr
-	Amode   uintptr
+	Amode   amode
 	Thunk   Thunk24
 	DSA     [144]byte
 }

@@ -11,11 +11,11 @@ type PLIST struct {
 	list          [15]uint32
 	Workarea      [128]uint64
 	SafRcAlet     int32
-	Rc            int32
+	SafRc         int32
 	RacfRcAlet    int32
 	RacfRc        int32
 	RacfRsnAlet   int32
-	RacfRsnRc     int32
+	RacfRsn       int32
 	FuncAlet      int32
 	Func          int16
 	OptionWord    int32
@@ -37,11 +37,11 @@ func main() {
 	plist31 := (*PLIST)(unsafe.Pointer(zutils.Malloc31(siz)))
 	plist31.list[0] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.Workarea)))
 	plist31.list[1] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.SafRcAlet)))
-	plist31.list[2] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.Rc)))
+	plist31.list[2] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.SafRc)))
 	plist31.list[3] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RacfRcAlet)))
 	plist31.list[4] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RacfRc)))
 	plist31.list[5] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RacfRsnAlet)))
-	plist31.list[6] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RacfRsnRc)))
+	plist31.list[6] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RacfRsn)))
 	plist31.list[7] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.FuncAlet)))
 	plist31.list[8] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.Func)))
 	plist31.list[9] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.OptionWord)))
@@ -52,7 +52,7 @@ func main() {
 	plist31.list[14] = uint32(0x7fffffff & uintptr(unsafe.Pointer(&plist31.RegNameLen)))
 	plist31.list[14] |= uint32(0x80000000)
 
-	// LOAD IRRSIM64
+	// LOAD IRRSIM00
 	mod := zutils.LoadMod("IRRSIM00")
 	if uintptr(unsafe.Pointer(mod)) != 0 {
 		plist31.Func = 0x3
@@ -61,7 +61,7 @@ func main() {
 		plist31.RacfUseridLen = 3
 		RC := mod.Call(uintptr(unsafe.Pointer(plist31)))
 		if RC == 0 {
-			fmt.Printf("SafRC %d RacfRc %d Reason %d\n", plist31.Rc, plist31.RacfRc, plist31.RacfRsnRc)
+			fmt.Printf("SafRC %d RacfRc %d Reason %d\n", plist31.SafRc, plist31.RacfRc, plist31.RacfRsn)
 		} else {
 			fmt.Printf("Call rc=0x%x\n", RC)
 		}
